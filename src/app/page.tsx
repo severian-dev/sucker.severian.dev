@@ -91,7 +91,6 @@ export default function Home() {
     if (!card.avatarUrl) return;
 
     try {
-      // Use proxy directly instead of attempting CORS
       const img = new Image();
       img.src = `/api/proxy/image?url=${encodeURIComponent(card.avatarUrl)}`;
 
@@ -100,14 +99,12 @@ export default function Home() {
         img.onerror = reject;
       });
 
-      // Create a canvas to convert WebP to PNG
       const canvas = document.createElement("canvas");
       canvas.width = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext("2d");
       if (!ctx) throw new Error("Could not get canvas context");
 
-      // Draw the image and convert to PNG
       ctx.drawImage(img, 0, 0);
       const pngBlob = await new Promise<Blob>((resolve) => {
         canvas.toBlob((blob) => {
@@ -116,10 +113,8 @@ export default function Home() {
         }, "image/png");
       });
 
-      // Convert blob to array buffer for PNG embedding
       const arrayBuffer = await pngBlob.arrayBuffer();
 
-      // Prepare card data for embedding
       const cardData = JSON.stringify({
         name: card.name,
         first_mes: card.first_mes,
@@ -129,7 +124,6 @@ export default function Home() {
         scenario: card.scenario,
       });
 
-      // Generate PNG with embedded card data
       const newImageData = Png.Generate(arrayBuffer, cardData);
       const newFileName = `${
         card.name.replace(/\s+/g, "_") || "character"
@@ -138,14 +132,12 @@ export default function Home() {
         type: "image/png",
       });
 
-      // Download the file
       const link = URL.createObjectURL(newFile);
       const a = document.createElement("a");
       a.download = newFileName;
       a.href = link;
       a.click();
 
-      // Cleanup
       URL.revokeObjectURL(link);
     } catch (error) {
       console.error("Error generating PNG:", error);
