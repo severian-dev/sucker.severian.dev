@@ -52,7 +52,7 @@ function safeReplace(text: string, old: string, newStr: string): string {
 
 function extractCardData(messages: Message[]): CardData {
   const content0 = messages[0].content;
-  const content1 = messages[1].content;
+  const content1 = messages[2].content;
 
   const userName = extractPersonaName(content0, 0);
   const charName = extractPersonaName(content0, 1);
@@ -67,41 +67,41 @@ function extractCardData(messages: Message[]): CardData {
     first_mes: content1,
   };
 
-  if (personaMatches.length >= 2) {
-    const secondPersonaIdx = personaMatches[1].index!;
-    const startDesc = secondPersonaIdx + "'s Persona:".length;
-    const remaining = content0.slice(startDesc);
+  // blank user persona handling, or at least an attempt
+  let secondPersonaIdx =
+    personaMatches[personaMatches.length >= 2 ? 1 : 0]?.index;
+  const startDesc = secondPersonaIdx + "'s Persona:".length;
+  const remaining = content0.slice(startDesc);
 
-    const scenarioMarker = remaining.match(/Scenario of the roleplay:/);
-    const exampleMarker = remaining.match(/Example conversations between/);
+  const scenarioMarker = remaining.match(/Scenario of the roleplay:/);
+  const exampleMarker = remaining.match(/Example conversations between/);
 
-    let endIdx = remaining.length;
-    if (scenarioMarker) endIdx = Math.min(endIdx, scenarioMarker.index!);
-    if (exampleMarker) endIdx = Math.min(endIdx, exampleMarker.index!);
+  let endIdx = remaining.length;
+  if (scenarioMarker) endIdx = Math.min(endIdx, scenarioMarker.index!);
+  if (exampleMarker) endIdx = Math.min(endIdx, exampleMarker.index!);
 
-    cardData.description = remaining.slice(0, endIdx).trim();
+  cardData.description = remaining.slice(0, endIdx).trim();
 
-    if (scenarioMarker) {
-      const scenarioStart = scenarioMarker.index! + scenarioMarker[0].length;
-      const scenarioRemaining = remaining.slice(scenarioStart);
-      const exampleInScenarioMarker = scenarioRemaining.match(
-        /Example conversations between/
-      );
-      const scenarioEnd = exampleInScenarioMarker
-        ? exampleInScenarioMarker.index!
-        : scenarioRemaining.length;
-      cardData.scenario = scenarioRemaining.slice(0, scenarioEnd).trim();
-    }
+  if (scenarioMarker) {
+    const scenarioStart = scenarioMarker.index! + scenarioMarker[0].length;
+    const scenarioRemaining = remaining.slice(scenarioStart);
+    const exampleInScenarioMarker = scenarioRemaining.match(
+      /Example conversations between/
+    );
+    const scenarioEnd = exampleInScenarioMarker
+      ? exampleInScenarioMarker.index!
+      : scenarioRemaining.length;
+    cardData.scenario = scenarioRemaining.slice(0, scenarioEnd).trim();
+  }
 
-    if (exampleMarker) {
-      const exampleStart = exampleMarker.index!;
-      const rawExampleStr = remaining.slice(exampleStart).trim();
-      const colonIdx = rawExampleStr.indexOf(":");
-      cardData.mes_example =
-        colonIdx !== -1
-          ? rawExampleStr.slice(colonIdx + 1).trim()
-          : rawExampleStr.trim();
-    }
+  if (exampleMarker) {
+    const exampleStart = exampleMarker.index!;
+    const rawExampleStr = remaining.slice(exampleStart).trim();
+    const colonIdx = rawExampleStr.indexOf(":");
+    cardData.mes_example =
+      colonIdx !== -1
+        ? rawExampleStr.slice(colonIdx + 1).trim()
+        : rawExampleStr.trim();
   }
 
   for (const field in cardData) {
