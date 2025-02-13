@@ -39,25 +39,32 @@ interface PersonaMatch {
 }
 
 function findTagsBetween(content: string, startMarker: string, endMarker: string): PersonaMatch[] {
-  const startIdx = content.indexOf(`<${startMarker}>`);
+  const startMarkerTag = `<${startMarker}>`;
+  const endMarkerTag = `<${endMarker}>`;
+  
+  const startIdx = content.indexOf(startMarkerTag);
   if (startIdx === -1) return [];
   
-  const endIdx = content.indexOf(`<${endMarker}>`);
+  const endIdx = content.indexOf(endMarkerTag);
   if (endIdx === -1) return [];
   
-  const section = content.slice(startIdx + startMarker.length + 2, endIdx);
+  const section = content.slice(startIdx, endIdx);
+  console.log("Section found:", section);
+  
   const matches: PersonaMatch[] = [];
   
-  const tagPattern = /<([^/>][^>]*)>([^]*?)<\/\1>/g;
+  const tagPattern = /<([^/>\s][^>]*)>([^]*?)<\/\1>/g;
   let match;
   
   while ((match = tagPattern.exec(section)) !== null) {
+    console.log("Found match:", match[1], match[2].substring(0, 50) + "...");
     matches.push({
-      tag: match[1],
+      tag: match[1].trim(),
       content: match[2].trim()
     });
   }
   
+  console.log("Total matches found:", matches.length);
   return matches;
 }
 
