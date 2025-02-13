@@ -187,9 +187,9 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold">Sucker v1.1</h1>
+            <h1 className="text-3xl font-bold">Sucker v1.2</h1>
             <p className="text-sm text-muted-foreground">
-              Fixed R1 handling change, blank user persona bug.
+              If it's any consolation, I hate making these changes too.
             </p>
           </div>
           <Button
@@ -233,8 +233,14 @@ export default function Home() {
                   API settings, any value for model and key.
                 </li>
                 <li className="mb-2">
-                  Remove your custom prompt - otherwise, it'll get inserted into
-                  cards, on the example message section.
+                  <span className="line-through">
+                    Remove your custom prompt - otherwise, it'll get inserted
+                    into cards, on the example message section.
+                  </span>
+                  <span>
+                    &nbsp;No need for this anymore. At least the new prompt system has
+                    it separate now.
+                  </span>
                 </li>
                 <li className="mb-2">
                   Save settings and refresh the page. Not this page. <i>That</i>{" "}

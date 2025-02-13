@@ -33,17 +33,38 @@ interface CardData {
   scenario: string;
 }
 
-function extractPersonaName(content: string, personaIndex: number = 0): string {
-  const personaMatches = Array.from(content.matchAll(/'s Persona:/g));
-  if (personaMatches.length <= personaIndex) return "";
+interface PersonaMatch {
+  tag: string;
+  content: string;
+}
 
-  const personaIdx = personaMatches[personaIndex].index!;
-  const lineStartIdx = content.lastIndexOf("\n", personaIdx);
-  const lineEndIdx = personaIdx;
+function findTagsBetween(content: string, startMarker: string, endMarker: string): PersonaMatch[] {
+  const startIdx = content.indexOf(`<${startMarker}>`);
+  if (startIdx === -1) return [];
+  
+  const endIdx = content.indexOf(`<${endMarker}>`);
+  if (endIdx === -1) return [];
+  
+  const section = content.slice(startIdx + startMarker.length + 2, endIdx);
+  const tagRegex = /<([^/>]+)>([^<]+)<\/\1>/g;
+  const matches = Array.from(section.matchAll(tagRegex));
+  
+  return matches.map(match => ({
+    tag: match[1],
+    content: match[2].trim()
+  }));
+}
 
-  return content
-    .slice(lineStartIdx === -1 ? 0 : lineStartIdx + 1, lineEndIdx)
-    .trim();
+function extractBetweenTags(content: string, tag: string): string {
+  const startTag = `<${tag}>`;
+  const endTag = `</${tag}>`;
+  const startIndex = content.indexOf(startTag);
+  if (startIndex === -1) return "";
+  
+  const endIndex = content.indexOf(endTag, startIndex);
+  if (endIndex === -1) return "";
+  
+  return content.slice(startIndex + startTag.length, endIndex).trim();
 }
 
 function safeReplace(text: string, old: string, newStr: string): string {
@@ -54,63 +75,27 @@ function extractCardData(messages: Message[]): CardData {
   const content0 = messages[0].content;
   const content1 = messages[2].content;
 
-  const userName = extractPersonaName(content0, 0);
-  const charName = extractPersonaName(content0, 1);
+  // Find all persona tags between system and scenario, take the last one as character
+  const personas = findTagsBetween(content0, "system", "scenario");
+  const charPersona = personas[personas.length - 1];
+  const charName = charPersona?.tag || "";
 
-  const personaMatches = Array.from(content0.matchAll(/'s Persona:/g));
+  // Initialize card data with the character name
   let cardData: CardData = {
     name: charName,
-    description: "",
-    scenario: "",
-    mes_example: "",
-    personality: "",
+    description: charPersona?.content || "",
+    scenario: extractBetweenTags(content0, "scenario"),
+    mes_example: extractBetweenTags(content0, "example_dialogs"),
+    personality: "", // This field isn't used in the new format
     first_mes: content1,
   };
 
-  // blank user persona handling, or at least an attempt
-  let secondPersonaIdx =
-    personaMatches[personaMatches.length >= 2 ? 1 : 0]?.index;
-  const startDesc = secondPersonaIdx + "'s Persona:".length;
-  const remaining = content0.slice(startDesc);
-
-  const scenarioMarker = remaining.match(/Scenario of the roleplay:/);
-  const exampleMarker = remaining.match(/Example conversations between/);
-
-  let endIdx = remaining.length;
-  if (scenarioMarker) endIdx = Math.min(endIdx, scenarioMarker.index!);
-  if (exampleMarker) endIdx = Math.min(endIdx, exampleMarker.index!);
-
-  cardData.description = remaining.slice(0, endIdx).trim();
-
-  if (scenarioMarker) {
-    const scenarioStart = scenarioMarker.index! + scenarioMarker[0].length;
-    const scenarioRemaining = remaining.slice(scenarioStart);
-    const exampleInScenarioMarker = scenarioRemaining.match(
-      /Example conversations between/
-    );
-    const scenarioEnd = exampleInScenarioMarker
-      ? exampleInScenarioMarker.index!
-      : scenarioRemaining.length;
-    cardData.scenario = scenarioRemaining.slice(0, scenarioEnd).trim();
-  }
-
-  if (exampleMarker) {
-    const exampleStart = exampleMarker.index!;
-    const rawExampleStr = remaining.slice(exampleStart).trim();
-    const colonIdx = rawExampleStr.indexOf(":");
-    cardData.mes_example =
-      colonIdx !== -1
-        ? rawExampleStr.slice(colonIdx + 1).trim()
-        : rawExampleStr.trim();
-  }
-
+  // Replace character name with placeholder in all fields
   for (const field in cardData) {
     if (field !== "name") {
       const val = cardData[field as keyof CardData];
       if (typeof val === "string") {
-        let newVal = safeReplace(val, userName, "{{user}}");
-        newVal = safeReplace(newVal, charName, "{{char}}");
-        cardData[field as keyof CardData] = newVal;
+        cardData[field as keyof CardData] = safeReplace(val, charName, "{{char}}");
       }
     }
   }
