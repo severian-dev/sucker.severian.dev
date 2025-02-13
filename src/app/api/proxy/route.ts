@@ -53,34 +53,36 @@ function findTagsBetween(content: string, startMarker: string, endMarker: string
     return [];
   }
   
-  const endIdx = content.indexOf(endMarkerTag);
-  console.log("End marker index:", endIdx);
-  if (endIdx === -1) {
-    console.log("End marker not found");
-    return [];
-  }
-  
-  const section = content.slice(startIdx, endIdx);
+  // Look for any XML-style tags after the system tag
+  const section = content.slice(startIdx);
   console.log("Section length:", section.length);
-  console.log("Section found:", section);
   
   const matches: PersonaMatch[] = [];
   
+  // Match any tag that comes before the scenario tag
   const tagPattern = /<([^/>\s][^>]*)>([\s\S]*?)<\/\1>/g;
   console.log("Using pattern:", tagPattern);
   let match;
   
   try {
     while ((match = tagPattern.exec(section)) !== null) {
-      console.log("Found match:", {
-        fullMatch: match[0],
-        tag: match[1],
-        contentPreview: match[2].substring(0, 50) + "..."
-      });
-      matches.push({
-        tag: match[1].trim(),
-        content: match[2].trim()
-      });
+      // Stop if we hit the scenario tag
+      if (match[1] === endMarker) {
+        break;
+      }
+      
+      // Skip the system tag
+      if (match[1] !== startMarker) {
+        console.log("Found match:", {
+          fullMatch: match[0],
+          tag: match[1],
+          contentPreview: match[2].substring(0, 50) + "..."
+        });
+        matches.push({
+          tag: match[1].trim(),
+          content: match[2].trim()
+        });
+      }
     }
   } catch (error) {
     console.error("Error during regex execution:", error);
