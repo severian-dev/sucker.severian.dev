@@ -53,7 +53,7 @@ function findTagsBetween(content: string, startMarker: string, endMarker: string
   
   const matches: PersonaMatch[] = [];
   
-  const tagPattern = /<([^/>\s][^>]*)>([^]*?)<\/\1>/g;
+  const tagPattern = /<([^/>\s][^>]*)>([\s\S]*?)<\/\1>/g;
   let match;
   
   while ((match = tagPattern.exec(section)) !== null) {
