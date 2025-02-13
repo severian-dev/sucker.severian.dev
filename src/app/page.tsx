@@ -187,9 +187,9 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold">Sucker v1.2</h1>
+            <h1 className="text-3xl font-bold">Sucker v1.3</h1>
             <p className="text-sm text-muted-foreground">
-              If it's any consolation, I hate making these changes too.
+              I still hate making these changes, but Mooth found a bug so I fixed it. 
             </p>
           </div>
           <Button
