@@ -39,29 +39,18 @@ interface PersonaMatch {
 }
 
 function findTagsBetween(content: string, startMarker: string, endMarker: string): PersonaMatch[] {
-  console.log("Starting findTagsBetween with markers:", startMarker, endMarker);
-  console.log("Content length:", content.length);
-  console.log("First 100 chars of content:", content.substring(0, 100));
-  
   const startMarkerTag = `<${startMarker}>`;
   const endMarkerTag = `<${endMarker}>`;
   
   const startIdx = content.indexOf(startMarkerTag);
-  console.log("Start marker index:", startIdx);
-  if (startIdx === -1) {
-    console.log("Start marker not found");
-    return [];
-  }
+  if (startIdx === -1) return [];
   
   // Look for any XML-style tags after the system tag
   const section = content.slice(startIdx);
-  console.log("Section length:", section.length);
-  
   const matches: PersonaMatch[] = [];
   
   // Match any tag that comes before the scenario tag
   const tagPattern = /<([^/>\s][^>]*)>([\s\S]*?)<\/\1>/g;
-  console.log("Using pattern:", tagPattern);
   let match;
   
   try {
@@ -73,11 +62,6 @@ function findTagsBetween(content: string, startMarker: string, endMarker: string
       
       // Skip the system tag
       if (match[1] !== startMarker) {
-        console.log("Found match:", {
-          fullMatch: match[0],
-          tag: match[1],
-          contentPreview: match[2].substring(0, 50) + "..."
-        });
         matches.push({
           tag: match[1].trim(),
           content: match[2].trim()
@@ -88,8 +72,6 @@ function findTagsBetween(content: string, startMarker: string, endMarker: string
     console.error("Error during regex execution:", error);
   }
   
-  console.log("Total matches found:", matches.length);
-  console.log("Matches:", matches);
   return matches;
 }
 
@@ -110,24 +92,13 @@ function safeReplace(text: string, old: string, newStr: string): string {
 }
 
 function extractCardData(messages: Message[]): CardData {
-  console.log("Starting extractCardData");
-  console.log("Messages length:", messages.length);
-  
   const content0 = messages[0].content;
   const content1 = messages[2].content;
-  
-  console.log("Content0 length:", content0.length);
-  console.log("Content1 length:", content1.length);
 
   // Find all persona tags between system and scenario, take the last one as character
-  console.log("Finding personas between system and scenario");
   const personas = findTagsBetween(content0, "system", "scenario");
-  console.log("Found personas:", personas);
-  
   const charPersona = personas[personas.length - 1];
-  console.log("Selected char persona:", charPersona);
   const charName = charPersona?.tag || "";
-  console.log("Char name:", charName);
 
   // Initialize card data with the character name
   let cardData: CardData = {
@@ -139,8 +110,6 @@ function extractCardData(messages: Message[]): CardData {
     first_mes: content1,
   };
 
-  console.log("Initial card data:", cardData);
-
   // Replace character name with placeholder in all fields
   for (const field in cardData) {
     if (field !== "name") {
@@ -151,7 +120,6 @@ function extractCardData(messages: Message[]): CardData {
     }
   }
 
-  console.log("Final card data:", cardData);
   return cardData;
 }
 
@@ -168,12 +136,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    console.log("Received POST request");
     const body = await request.json();
-    console.log("Request body received");
 
     if (!body.messages || body.messages.length < 2) {
-      console.log("Invalid request - missing messages or insufficient count");
       return NextResponse.json(
         { error: "Missing messages or insufficient message count" },
         {
@@ -185,10 +150,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("Processing card data");
     const cardData = extractCardData(body.messages);
-    console.log("Card data processed");
-    
     extractedCards.push({
       ...cardData,
       timestamp: Date.now(),
@@ -207,7 +169,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("Error processing request:", error);
-    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
     return NextResponse.json(
       { error: "Internal server error" },
       {
