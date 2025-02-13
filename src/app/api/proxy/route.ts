@@ -38,28 +38,27 @@ interface PersonaMatch {
   content: string;
 }
 
-function findTagsBetween(content: string, startMarker: string, endMarker: string): PersonaMatch[] {
+function findTagsBetween(content: string, startMarker: string): PersonaMatch[] {
   const startMarkerTag = `<${startMarker}>`;
-  const endMarkerTag = `<${endMarker}>`;
   
   const startIdx = content.indexOf(startMarkerTag);
   if (startIdx === -1) return [];
   
-  // Look for any XML-style tags after the system tag
-  const section = content.slice(startIdx);
+  const scenarioIdx = content.indexOf("<scenario>");
+  const exampleIdx = content.indexOf("<example_dialogs>");
+  
+  let endIdx = content.length;
+  if (scenarioIdx !== -1) endIdx = Math.min(endIdx, scenarioIdx);
+  if (exampleIdx !== -1) endIdx = Math.min(endIdx, exampleIdx);
+  
+  const section = content.slice(startIdx, endIdx);
   const matches: PersonaMatch[] = [];
   
-  // Match any tag that comes before the scenario tag
   const tagPattern = /<([^/>\s][^>]*)>([\s\S]*?)<\/\1>/g;
   let match;
   
   try {
     while ((match = tagPattern.exec(section)) !== null) {
-      // Stop if we hit the scenario tag
-      if (match[1] === endMarker) {
-        break;
-      }
-      
       // Skip the system tag
       if (match[1] !== startMarker) {
         matches.push({
@@ -95,8 +94,8 @@ function extractCardData(messages: Message[]): CardData {
   const content0 = messages[0].content;
   const content1 = messages[2].content;
 
-  // Find all persona tags between system and scenario, take the last one as character
-  const personas = findTagsBetween(content0, "system", "scenario");
+  // Find all persona tags between system and the first optional tag (scenario or example_dialogs)
+  const personas = findTagsBetween(content0, "system");
   const charPersona = personas[personas.length - 1];
   const charName = charPersona?.tag || "";
 
