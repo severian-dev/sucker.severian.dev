@@ -96,8 +96,11 @@ function extractCardData(messages: Message[]): CardData {
 
   // Find all persona tags between system and the first optional tag (scenario or example_dialogs)
   const personas = findTagsBetween(content0, "system");
+  
+  const userPersona = personas[personas.length - 2];
   const charPersona = personas[personas.length - 1];
   const charName = charPersona?.tag || "";
+  const userName = userPersona?.tag || "";
 
   // Initialize card data with the character name
   let cardData: CardData = {
@@ -108,6 +111,16 @@ function extractCardData(messages: Message[]): CardData {
     personality: "", // This field isn't used in the new format
     first_mes: content1,
   };
+
+  // Replace user name with placeholder in all fields
+  for (const field in cardData) {
+    if (field !== "name") {
+      const val = cardData[field as keyof CardData];
+      if (typeof val === "string") {
+        cardData[field as keyof CardData] = safeReplace(val, userName, "{{user}}");
+      }
+    }
+  }
 
   // Replace character name with placeholder in all fields
   for (const field in cardData) {
