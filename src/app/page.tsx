@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Png } from "@/lib/png";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, Copy } from "lucide-react";
 import {
   CollapsibleContent,
   Collapsible,
@@ -182,14 +182,19 @@ export default function Home() {
     }
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold">Sucker v1.5</h1>
+            <h1 className="text-3xl font-bold">Sucker v1.6</h1>
             <p className="text-sm text-muted-foreground">
-              User persona name substitution fixed, let me know how it goes.
+              Wherein Myscell&apos;s Not-Unreasonable, Yet Still Annoying,
+              Request is Delivered with a Heavy Sigh
             </p>
           </div>
           <Button
@@ -238,8 +243,8 @@ export default function Home() {
                     into cards, on the example message section.
                   </span>
                   <span>
-                    &nbsp;No need for this anymore. At least the new prompt system has
-                    it separate now.
+                    &nbsp;No need for this anymore. At least the new prompt
+                    system has it separate now.
                   </span>
                 </li>
                 <li className="mb-2">
@@ -290,7 +295,19 @@ export default function Home() {
                               <AccordionItem value="description">
                                 <AccordionTrigger>Description</AccordionTrigger>
                                 <AccordionContent>
-                                  {card.description}
+                                  <div className="flex justify-between">
+                                    <pre className="whitespace-pre-wrap font-sans text-sm">{card.description}</pre>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        copyToClipboard(card.description); 
+                                      }}
+                                    >
+                                      <Copy className="h-4 w-4" />
+                                    </Button>
+                                  </div>
                                 </AccordionContent>
                               </AccordionItem>
                             </Accordion>
@@ -302,7 +319,19 @@ export default function Home() {
                                   First Message
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  {card.first_mes}
+                                  <div className="flex justify-between">
+                                    <pre className="whitespace-pre-wrap font-sans text-sm">{card.first_mes}</pre>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        copyToClipboard(card.first_mes); 
+                                      }}
+                                    >
+                                      <Copy className="h-4 w-4" />
+                                    </Button>
+                                  </div>
                                 </AccordionContent>
                               </AccordionItem>
                             </Accordion>
@@ -312,7 +341,19 @@ export default function Home() {
                               <AccordionItem value="scenario">
                                 <AccordionTrigger>Scenario</AccordionTrigger>
                                 <AccordionContent>
-                                  {card.scenario}
+                                  <div className="flex justify-between">
+                                    <pre className="whitespace-pre-wrap font-sans text-sm">{card.scenario}</pre>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        copyToClipboard(card.scenario); 
+                                      }}
+                                    >
+                                      <Copy className="h-4 w-4" />
+                                    </Button>
+                                  </div>
                                 </AccordionContent>
                               </AccordionItem>
                             </Accordion>
@@ -324,7 +365,41 @@ export default function Home() {
                                   Example Messages
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                  {card.mes_example}
+                                  <div className="flex justify-between">
+                                    <pre className="whitespace-pre-wrap font-sans text-sm">{card.mes_example}</pre>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        copyToClipboard(card.mes_example); 
+                                      }}
+                                    >
+                                      <Copy className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </AccordionContent>
+                              </AccordionItem>
+                            </Accordion>
+                          )}
+                          {card.personality && (
+                            <Accordion type="single" collapsible>
+                              <AccordionItem value="personality">
+                                <AccordionTrigger>Personality</AccordionTrigger>
+                                <AccordionContent>
+                                  <div className="flex justify-between">
+                                    <pre className="whitespace-pre-wrap font-sans text-sm">{card.personality}</pre>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        copyToClipboard(card.personality); 
+                                      }}
+                                    >
+                                      <Copy className="h-4 w-4" />
+                                    </Button>
+                                  </div>
                                 </AccordionContent>
                               </AccordionItem>
                             </Accordion>

@@ -4,6 +4,7 @@ Check package.json for commands, I can't be bothered.
 
 ### Changelog
 
+- 1.6: First message formatting, copy button for first message and other fields
 - 1.5: {{user}} substitution for user persona name
 - 1.4: Mooth just keeps finding bugs, damn.
 - 1.3: Mooth found a bug, fixed it.
