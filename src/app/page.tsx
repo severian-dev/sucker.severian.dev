@@ -191,10 +191,9 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold">Sucker v1.6</h1>
+            <h1 className="text-3xl font-bold">Sucker v1.7</h1>
             <p className="text-sm text-muted-foreground">
-              Wherein Myscell&apos;s Not-Unreasonable, Yet Still Annoying,
-              Request is Delivered with a Heavy Sigh
+              Handles nested XML character tags now, let me know how it goes.
             </p>
           </div>
           <Button

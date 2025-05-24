@@ -40,49 +40,118 @@ interface PersonaMatch {
 
 function findTagsBetween(content: string, startMarker: string): PersonaMatch[] {
   const startMarkerTag = `<${startMarker}>`;
-  
+
   const startIdx = content.indexOf(startMarkerTag);
   if (startIdx === -1) return [];
-  
+
   const scenarioIdx = content.indexOf("<scenario>");
   const exampleIdx = content.indexOf("<example_dialogs>");
-  
+
   let endIdx = content.length;
   if (scenarioIdx !== -1) endIdx = Math.min(endIdx, scenarioIdx);
   if (exampleIdx !== -1) endIdx = Math.min(endIdx, exampleIdx);
-  
+
   const section = content.slice(startIdx, endIdx);
   const matches: PersonaMatch[] = [];
-  
-  const tagPattern = /<([^/>\s][^>]*)>([\s\S]*?)<\/\1>/g;
-  let match;
-  
-  try {
-    while ((match = tagPattern.exec(section)) !== null) {
-      // Skip the system tag
-      if (match[1] !== startMarker) {
-        matches.push({
-          tag: match[1].trim(),
-          content: match[2].trim()
-        });
+
+  let position = 0;
+
+  while (position < section.length) {
+    const tagStart = section.indexOf("<", position);
+    if (tagStart === -1) break;
+
+    const tagNameEnd = section.indexOf(">", tagStart);
+    if (tagNameEnd === -1) break;
+
+    const tagName = section.substring(tagStart + 1, tagNameEnd).trim();
+
+    if (tagName.startsWith("/") || tagName === startMarker) {
+      position = tagNameEnd + 1;
+      continue;
+    }
+
+    const openTag = `<${tagName}>`;
+    const closeTag = `</${tagName}>`;
+
+    let openTagPos = tagStart;
+    let closeTagPos = -1;
+    let tagCount = 1;
+    let searchPos = tagNameEnd + 1;
+
+    while (searchPos < section.length && tagCount > 0) {
+      const nextOpen = section.indexOf(openTag, searchPos);
+      const nextClose = section.indexOf(closeTag, searchPos);
+
+      if (nextClose === -1) break;
+
+      if (nextOpen !== -1 && nextOpen < nextClose) {
+        tagCount++;
+        searchPos = nextOpen + openTag.length;
+      } else {
+        tagCount--;
+        searchPos = nextClose + closeTag.length;
+
+        if (tagCount === 0) {
+          closeTagPos = nextClose;
+        }
       }
     }
-  } catch (error) {
-    console.error("Error during regex execution:", error);
+
+    if (closeTagPos !== -1) {
+      const tagContent = section.substring(tagNameEnd + 1, closeTagPos);
+
+      matches.push({
+        tag: tagName,
+        content: tagContent.trim(),
+      });
+
+      position = closeTagPos + closeTag.length;
+    } else {
+      position = tagNameEnd + 1;
+    }
   }
-  
+
   return matches;
 }
 
 function extractBetweenTags(content: string, tag: string): string {
   const startTag = `<${tag}>`;
   const endTag = `</${tag}>`;
+
   const startIndex = content.indexOf(startTag);
   if (startIndex === -1) return "";
-  
-  const endIndex = content.indexOf(endTag, startIndex);
+
+  // Handle nested tags by counting opening and closing tags
+  let openTagCount = 1;
+  let position = startIndex + startTag.length;
+  let endIndex = -1;
+
+  while (position < content.length && openTagCount > 0) {
+    const nextOpenTag = content.indexOf(startTag, position);
+    const nextCloseTag = content.indexOf(endTag, position);
+
+    // No more closing tags found
+    if (nextCloseTag === -1) break;
+
+    // Found another opening tag before the next closing tag
+    if (nextOpenTag !== -1 && nextOpenTag < nextCloseTag) {
+      openTagCount++;
+      position = nextOpenTag + startTag.length;
+    }
+    // Found a closing tag
+    else {
+      openTagCount--;
+      position = nextCloseTag + endTag.length;
+      // If we've found the matching closing tag for our initial opening tag
+      if (openTagCount === 0) {
+        endIndex = nextCloseTag;
+        break;
+      }
+    }
+  }
+
   if (endIndex === -1) return "";
-  
+
   return content.slice(startIndex + startTag.length, endIndex).trim();
 }
 
@@ -96,7 +165,7 @@ function extractCardData(messages: Message[]): CardData {
 
   // Find all persona tags between system and the first optional tag (scenario or example_dialogs)
   const personas = findTagsBetween(content0, "system");
-  
+
   const userPersona = personas[personas.length - 2];
   const charPersona = personas[personas.length - 1];
   const charName = charPersona?.tag || "";
@@ -117,7 +186,11 @@ function extractCardData(messages: Message[]): CardData {
     if (field !== "name") {
       const val = cardData[field as keyof CardData];
       if (typeof val === "string") {
-        cardData[field as keyof CardData] = safeReplace(val, userName, "{{user}}");
+        cardData[field as keyof CardData] = safeReplace(
+          val,
+          userName,
+          "{{user}}"
+        );
       }
     }
   }
@@ -127,7 +200,11 @@ function extractCardData(messages: Message[]): CardData {
     if (field !== "name") {
       const val = cardData[field as keyof CardData];
       if (typeof val === "string") {
-        cardData[field as keyof CardData] = safeReplace(val, charName, "{{char}}");
+        cardData[field as keyof CardData] = safeReplace(
+          val,
+          charName,
+          "{{char}}"
+        );
       }
     }
   }
