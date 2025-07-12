@@ -206,6 +206,18 @@ export default function Home() {
         </div>
 
         <Separator className="my-4" />
+        <div className="mb-8">
+          <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex flex-col justify-between">
+              <span className="text-lg font-semibold text-blue-800 dark:text-blue-200">
+                Heads-up.
+              </span>
+              <p className="text-sm text-muted-foreground">
+                Read the directions below, they're updated. If the site's inaccessible, I've been holding off on a server migration and I'm still not sure if this extractor seeing a lot of use was taking my instance down so lmk.
+              </p>
+            </div>
+          </div>
+        </div>
 
         <Collapsible
           open={isInstructionsOpen}
