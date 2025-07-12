@@ -191,9 +191,9 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold">Sucker v1.7</h1>
+            <h1 className="text-3xl font-bold">Sucker v1.8</h1>
             <p className="text-sm text-muted-foreground">
-              Handles nested XML character tags now, let me know how it goes.
+              Handles the new prompt structure. See instructions below, you'll need it.
             </p>
           </div>
           <Button
@@ -237,22 +237,23 @@ export default function Home() {
                   API settings, any value for model and key.
                 </li>
                 <li className="mb-2">
-                  <span className="line-through">
-                    Remove your custom prompt - otherwise, it'll get inserted
-                    into cards, on the example message section.
-                  </span>
-                  <span>
-                    &nbsp;No need for this anymore. At least the new prompt
-                    system has it separate now.
-                  </span>
+                  The new prompt structure abandoned XML tags so extraction's different now, but a bonus is you never have to worry about your persona getting sucked instead if you follow the instructions below closely.
+                </li>
+                <li className="mb-2">
+                  REQUIRED: Set your custom prompt to <code>&lt;.&gt;</code>.
+                </li>
+                <li className="mb-2">
+                  REQUIRED: Set your persona (or create a new one) with the name <code>&#123;user&#125;</code> and the description should only have <code>.</code> in it.
                 </li>
                 <li className="mb-2">
                   Save settings and refresh the page. Not this page. <i>That</i>{" "}
                   page.
                 </li>
                 <li className="mb-2">
-                  Start a new chat with a character or multiple. Send any
-                  message.
+                  Start a new chat with a character or multiple.
+                </li>
+                <li className="mb-2">
+                  REQUIRED: The message you'll send should ONLY contain the char name and nothing else.
                 </li>
                 <li className="mb-2">
                   Hit the Refresh button here, and the cards should appear here.

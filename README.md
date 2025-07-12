@@ -4,6 +4,7 @@ Check package.json for commands, I can't be bothered.
 
 ### Changelog
 
+- 1.8: Handling for new prompt structure, new instructions
 - 1.7: Handling for nested XML character tags
 - 1.6: First message formatting, copy button for first message and other fields
 - 1.5: {{user}} substitution for user persona name
